@@ -86,7 +86,11 @@ class RotatingProxyMiddleware(object):
             with codecs.open(proxy_path, 'r', encoding='utf8') as f:
                 proxy_list = [line.strip() for line in f if line.strip()]
         else:
-            proxy_list = s.getlist('ROTATING_PROXY_LIST')
+            proxy_list = s.get('ROTATING_PROXY_LIST', None)
+            if not isinstance(proxy_list, list):
+                func = load_object(proxy_list)
+                proxy_list = func()
+
         if not proxy_list:
             raise NotConfigured()
         mw = cls(
